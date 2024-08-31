@@ -1,0 +1,20 @@
+.profile_icon{border: 1px solid green;
+height: 200px;
+width: 200px;
+border-radius: 50%;
+position: relative;
+overflow: hidden;
+}
+#profile_edit{
+    position: absolute;
+    font-size: 30px;
+    top: 40;
+    left: 150px;
+    z-index: 10;
+    border: 1px solid green;
+    border-radius: 50%;
+    background-color: green;
+    cursor: pointer;
+}
+#profile_image{width: 100%;
+}
