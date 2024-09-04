@@ -1,27 +1,42 @@
 
 import axios from 'axios';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import io from 'socket.io-client';
-
-// Initialize Socket.IO
-const socket = io('http://localhost:9999', { withCredentials: true });
+const socket = io('http://localhost:9999'); 
 
 function Home() {
-  const [users, setUsers] = useState([]);
-  const [selectedUser, setSelectedUser] = useState({});
-  const [messages, setMessages] = useState([]);
-  const [messageInput, setMessageInput] = useState('');
+
+
+
+
+  const [user, setUser] = useState([]);
+  const [singleUser, setSingleUser] = useState({});
+  const [message, setMessage] = useState([]);
+  const [mssg, setMssg] = useState('');
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [sessionUser, setSessionUser] = useState('');
 
-  // Fetch users data
-  const fetchUsers = async () => {
+  const chatBoxRef = useRef(null);
+
+
+
+
+
+
+  const userdata = async () => {
     setLoading(true);
     try {
-      const response = await axios.get('http://localhost:9999/getuser');
-      setUsers(response.data);
+      const token = localStorage.getItem('token');
+      const response = await axios.get('http://localhost:9999/getuser', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setUser(response.data.data);
+      setSessionUser(response.data.user)
     } catch (error) {
       console.error('Error fetching users:', error);
       setError('Failed to load users.');
@@ -29,58 +44,27 @@ function Home() {
       setLoading(false);
     }
   };
+ 
 
   useEffect(() => {
-    fetchUsers();
+    userdata();
   }, []);
 
-
-
-const handleUserSelect = async (e) => {
-  try {
-    const token = localStorage.getItem('token');
+  // Fetch and display messages
+  const chatshow = async (e) => {
     const userString = e.currentTarget.getAttribute('data-user');
     const userObject = JSON.parse(userString);
-    setSelectedUser(userObject);
+    setSingleUser(userObject);
     setSelectedUserId(userObject.user_id);
 
-    const response = await axios.post(
-      'http://localhost:9999/getmessage',
-      { receiverId: userObject.user_id },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+    socket.emit('joinRoom', userObject.user_id);
 
-    const allMessages = response.data.flatMap((chat) => chat.messages);
-    setMessages(allMessages);
-  } catch (error) {
-    console.log('Error fetching messages:', error);
-  }
-};
-
-// Send a new message
-const handleSendMessage = async (e) => {
-  e.preventDefault();
-
-  if (selectedUserId) {
+    // Fetch initial chat history
     try {
       const token = localStorage.getItem('token');
-      const messageData = {
-        content: messageInput,
-        receiverId: selectedUserId,
-      };
-
-      socket.emit('message', {
-        ...messageData,
-        senderId: token, // Ensure the sender ID is correct
-      });
-
-      await axios.post(
-        'http://localhost:9999/createChat',
-        messageData,
+      const response = await axios.post(
+        'http://localhost:9999/getmessage',
+        { receiverId: userObject.user_id },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -88,132 +72,136 @@ const handleSendMessage = async (e) => {
         }
       );
 
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        { ...messageData, senderId: token, timestamp: new Date() },
-      ]);
-
-      setMessageInput('');
+      const allMessages = response.data.flatMap(chat => chat.messages);
+      setMessage(allMessages);
     } catch (error) {
-      console.error('Error sending message:', error);
-      alert('Failed to send message. Please try again.');
+      console.log('Error fetching messages: ', error);
     }
-  } else {
-    alert('Please select a user to chat with.');
-  }
-};
-
-// Handle incoming messages in real-time using Socket.IO
-useEffect(() => {
-  socket.on('message', (newMessage) => {
-    if (selectedUserId) {
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        newMessage,
-      ]);
-    }
-  });
-
-  return () => {
-    socket.off('message');
   };
-}, [selectedUserId]);
 
-return (
-  <>
-    <div style={{ display: 'flex' }}>
-      {/* User list */}
-      <ul>
-        {loading ? (
-          <li>Loading...</li>
-        ) : error ? (
-          <li>{error}</li>
-        ) : (
-          users.map((user) => (
-            <li
-              style={{
-                border: '1px solid black',
-                width: '30vw',
-                height: '60px',
-                listStyle: 'none',
-              }}
-              key={user.user_id}
-              data-user={JSON.stringify(user)}
-              onClick={handleUserSelect}
-            >
-              {user.username}
-            </li>
-          ))
-        )}
-      </ul>
+  useEffect(() => {
+    socket.on('receiveMessage', (incomingMessage) => {
+      if (incomingMessage.receiverId === selectedUserId || incomingMessage.senderId === selectedUserId) {
+        setMessage(prevMessages => [...prevMessages, incomingMessage]);
+      }
+    });
+  
+    return () => {
+      socket.off('receiveMessage');
+    };
+  }, [selectedUserId]);
+  
+  
+  
+  const chatsend = (e) => {
+    e.preventDefault();
+  
+    if (selectedUserId) {
+      try {
+        const newMessage = {
+          content: mssg,
+          receiverId: selectedUserId,
+          senderId: sessionUser.user_id, 
+          timestamp: new Date(),
+        };
+  
 
-      {/* Chat box */}
-      <div className="chatbody" style={{ position: 'relative' }}>
-        {/* Selected user display */}
-        <div className="chatuser">
-          {selectedUser.username && (
-            <Link to={`/user/${selectedUser.username}/${selectedUser._id}`}>
-              {selectedUser.username}
-            </Link>
+        console.log('newMessageggggggggggggggggggggggggggg: ', newMessage);
+
+        socket.emit('sendMessage', newMessage);
+  
+        setMssg('');
+      } catch (error) {
+        console.log('Error sending message: ', error);
+        alert('Failed to send message. Please try again.');
+      }
+    } else {
+      alert('Please select a user to chat with.');
+    }
+  };
+
+  useEffect(() => {
+    chatBoxRef.current?.scrollTo(0, chatBoxRef.current.scrollHeight);
+  }, [message]);
+
+  return (
+    <>
+      <div style={{ display: 'flex' }}>
+        <ul>
+          {loading ? (
+            <li>Loading...</li>
+          ) : error ? (
+            <li>{error}</li>
+          ) : (
+            user.map((item) => (
+              <li
+                style={{ border: '1px solid black', width: '30vw', height: '60px', listStyle: 'none' }}
+                key={item.user_id}
+                id={item.user_id}
+                data-user={JSON.stringify(item)}
+                onClick={chatshow}
+              >
+                {item.username}
+              </li>
+            ))
           )}
-        </div>
-        
-        {/* Messages display */}
-        <div
-          className="chatbox"
-          style={{
-            border: '1px solid black',
-            width: '60vw',
-            height: '90vh',
-            overflowY: 'auto',
-          }}
-        >
-          {messages.map((msg, index) => (
-            <div
-              key={index}
-              style={{
-                display: 'flex',
-                justifyContent: msg.senderId === selectedUserId ? 'flex-start' : 'flex-end',
-              }}
-            >
+        </ul>
+
+        <div className="chatbody" style={{ position: 'relative' }}>
+          <div className="chatuser">
+            <Link to={`/user/${singleUser.username}/${singleUser._id}`}>
+              {singleUser.username}
+            </Link>
+          </div>
+          <div
+            className="chatbox"
+            style={{ border: '1px solid black', width: '60vw', height: '90vh', overflowY: 'auto' }}
+            ref={chatBoxRef}
+          >
+            {message.map((mg, i) => (
               <div
+                key={i}
                 style={{
-                  backgroundColor: msg.senderId === selectedUserId ? 'black' : 'green',
-                  margin: '4px',
-                  padding: '10px',
-                  borderRadius: '10px',
-                  color: 'white',
-                  maxWidth: '60%',
+                  display: 'flex',
+                  justifyContent: mg.senderId === selectedUserId ? 'flex-start' : 'flex-end',
                 }}
               >
-                {msg.content}
+                <div
+                  style={{
+                    backgroundColor: mg.senderId === selectedUserId ? 'black' : 'green',
+                    margin: '4px',
+                    padding: '10px',
+                    borderRadius: '10px',
+                    color: 'white',
+                    maxWidth: '60%',
+                  }}
+                >
+                  {mg.content}
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
-        
-        {/* Message input and send button */}
-        <div className="chatsend">
-          <input
-            type="text"
-            name="message"
-            value={messageInput}
-            id="message"
-            style={{ width: '40vw', height: '4vh' }}
-            onChange={(e) => setMessageInput(e.target.value)}
-          />
-          <button
-            type="submit"
-            onClick={handleSendMessage}
-            style={{ width: '10vw', height: '4vh' }}
-          >
-            Send
-          </button>
+            ))}
+          </div>
+          <div className="chatsend">
+            <input
+              type="text"
+              name="mssg"
+              value={mssg}
+              id="mssg"
+              style={{ width: '40vw', height: '4vh' }}
+              onChange={(e) => setMssg(e.target.value)}
+            />
+            <button
+              type="submit"
+              onClick={chatsend}
+              style={{ width: '10vw', height: '4vh' }}
+            >
+              Send
+            </button>
+          </div>
         </div>
       </div>
-    </div>
-  </>
-);
+    </>
+  );
 }
 
 export default Home;

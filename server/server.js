@@ -1,46 +1,70 @@
 const express = require('express');
-const app = express();
-const { Server } = require('socket.io');
 const http = require('http');
-const { createOrUpdateChat } = require('./utility');
-
+const socketIo = require('socket.io');
+const cors = require('cors');
+require('dotenv').config();
+const bodyparser = require('body-parser');
+require('./db/connection.js');
+const Chat = require('./model/chat.js'); 
+const router = require('./router/router');
+const app = express();
 const server = http.createServer(app);
-const io = new Server(server, {
+const io = socketIo(server, {
   cors: {
-    origin: 'http://localhost:5173', // Your frontend URL
+    origin: 'http://localhost:5173',
     methods: ['GET', 'POST'],
-    credentials: true
-  }
+    credentials: true,
+  },
 });
 
+app.use(cors({ origin: 'http://localhost:5173', credentials: true }));
+app.use(express.json());
+app.use(bodyparser.urlencoded({ extended: true }));
+app.use('/uploads', express.static('uploads'));
+app.use('/', router);
+
 io.on('connection', (socket) => {
-  console.log('A user connected:', socket.id);
+  console.log('New client connected');
 
-  socket.on('message', async (data) => {
+  socket.on('joinRoom', (room) => {
+    socket.join(room);
+  });
+
+  socket.on('sendMessage', async (message) => {
     try {
-      const { content, receiverId, senderId } = data;
-      const message = {
-        senderId,
-        content,
-        timestamp: new Date(),
-      };
+      console.log('fwiahfiwahfiwhaf',message);
+      let chat = await Chat.findOne({
+        $or: [
+          { user1Id: message.senderId, user2Id: message.receiverId },
+          { user1Id: message.receiverId, user2Id: message.senderId }
+        ]
+      });
 
-      // Save the message to the database
-      const chat = await createOrUpdateChat(senderId, receiverId, message);
+      if (!chat) {
+        chat = new Chat({
+          user1Id: message.senderId,
+          user2Id: message.receiverId,
+          messages: [message],
+        });
+      } else {
+        chat.messages.push(message);
+      }
 
-      // Emit the message to both sender and receiver
-      io.to(receiverId).emit('message', message);
-      io.to(senderId).emit('message', message);
+      await chat.save();
+
+      // Broadcast the message to the recipient
+      io.to(message.receiverId).emit('receiveMessage', message);
+      io.to(message.senderId).emit('receiveMessage', message); // Optionally, send the message back to the sender
     } catch (error) {
-      console.error('Error handling message:', error);
+      console.error('Error saving message:', error);
     }
   });
 
   socket.on('disconnect', () => {
-    console.log('User disconnected:', socket.id);
+    console.log('Client disconnected');
   });
 });
 
 server.listen(9999, () => {
-  console.log('Server is running on port 9999');
+  console.log('Server running on port 9999');
 });

@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const secret = 'fjwanfnwaifniwanfkwnighwignkqngiknakngiwangi3nkngwkangihaignqknguwangu3ahu3nq'; 
+const secret = process.env.Secret_code; 
 
 const authMiddleware = (req, res, next) => {
   const authHeader = req.headers.authorization;
@@ -11,9 +11,13 @@ const authMiddleware = (req, res, next) => {
   const token = authHeader.split(' ')[1];
 
   try {
+
     const decoded = jwt.verify(token, secret);
+    
+
     req.user_id = decoded.user_id;
     req.email = decoded.email;  
+    
     next(); 
   } catch (error) {
     console.log('Token verification failed:', error);
