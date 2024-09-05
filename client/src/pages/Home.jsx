@@ -3,7 +3,7 @@ import axios from 'axios';
 import React, { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import io from 'socket.io-client';
-const socket = io('http://localhost:9999'); 
+const socket = io('http://localhost:9999');
 
 function Home() {
 
@@ -18,13 +18,7 @@ function Home() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [sessionUser, setSessionUser] = useState('');
-
   const chatBoxRef = useRef(null);
-
-
-
-
-
 
   const userdata = async () => {
     setLoading(true);
@@ -44,13 +38,13 @@ function Home() {
       setLoading(false);
     }
   };
- 
+
 
   useEffect(() => {
     userdata();
   }, []);
 
-  // Fetch and display messages
+
   const chatshow = async (e) => {
     const userString = e.currentTarget.getAttribute('data-user');
     const userObject = JSON.parse(userString);
@@ -59,7 +53,6 @@ function Home() {
 
     socket.emit('joinRoom', userObject.user_id);
 
-    // Fetch initial chat history
     try {
       const token = localStorage.getItem('token');
       const response = await axios.post(
@@ -85,31 +78,25 @@ function Home() {
         setMessage(prevMessages => [...prevMessages, incomingMessage]);
       }
     });
-  
+
     return () => {
       socket.off('receiveMessage');
     };
   }, [selectedUserId]);
-  
-  
-  
+
   const chatsend = (e) => {
     e.preventDefault();
-  
+
     if (selectedUserId) {
       try {
         const newMessage = {
           content: mssg,
           receiverId: selectedUserId,
-          senderId: sessionUser.user_id, 
+          senderId: sessionUser.user_id,
           timestamp: new Date(),
         };
-  
-
-        console.log('newMessageggggggggggggggggggggggggggg: ', newMessage);
-
         socket.emit('sendMessage', newMessage);
-  
+
         setMssg('');
       } catch (error) {
         console.log('Error sending message: ', error);
@@ -123,6 +110,23 @@ function Home() {
   useEffect(() => {
     chatBoxRef.current?.scrollTo(0, chatBoxRef.current.scrollHeight);
   }, [message]);
+
+  // ############################  friend searchlist ##########################
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   return (
     <>

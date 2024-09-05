@@ -35,7 +35,7 @@ function Signup() {
       <input type="password" name="password" id="password" value={user.password} onChange={handleInp} />
       <input type="text" name="username" min={6} max={12} id="username" value={user.username} onChange={handleInp} />
       <button type="submit" onClick={subData}>Submit</button>
-      <p onClick={googleAuth} style={{ cursor: 'pointer',border:'1px solid black',width:'fit-content',padding:'4px' }}>Sign Up with Google</p>
+      {/* <p onClick={googleAuth} style={{ cursor: 'pointer',border:'1px solid black',width:'fit-content',padding:'4px' }}>Sign Up with Google</p> */}
       <p>I already have an account <Link to="/signin">Sign In</Link></p>
     </>
   );

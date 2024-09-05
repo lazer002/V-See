@@ -52,9 +52,8 @@ io.on('connection', (socket) => {
 
       await chat.save();
 
-      // Broadcast the message to the recipient
       io.to(message.receiverId).emit('receiveMessage', message);
-      io.to(message.senderId).emit('receiveMessage', message); // Optionally, send the message back to the sender
+      io.to(message.senderId).emit('receiveMessage', message); 
     } catch (error) {
       console.error('Error saving message:', error);
     }

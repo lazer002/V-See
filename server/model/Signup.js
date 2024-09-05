@@ -1,33 +1,43 @@
 const mon = require('mongoose')
 
 let userschema = new mon.Schema({
-    email:{
-        type:String,
-        required:true
+    email: {
+        type: String,
+        required: true
     },
-    password:{
-        type:String ,
-        required:true
+    password: {
+        type: String,
+        required: true
     },
-    username:{
-        type:String ,
-        required:true
+    username: {
+        type: String,
+        required: true
     },
-    user_role:{
-        type:String ,
-        required:true,
-        default:'false'
+    user_role: {
+        type: String,
+        required: true,
+        default: 'false'
     },
-    user_id:{
-        type:String ,
-        required:true,
+    user_id: {
+        type: String,
+        required: true,
     },
-    Profile:{
-        type:String,
-        
-    }
+    Profile: {
+        type: String,
+
+    },
+    friend_request: [{
+        request: {
+            type: String
+        },
+      
+        friend_list: [{
+            type: String
+        }]
+    }]
+   
 })
 
-let User = mon.model('User',userschema)
+let User = mon.model('User', userschema)
 
 module.exports = User
