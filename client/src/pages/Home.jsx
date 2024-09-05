@@ -1,10 +1,10 @@
 
 import axios from 'axios';
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef,useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import io from 'socket.io-client';
-const socket = io('http://localhost:9999');
-
+const socket = io('http://localhost:9999'); 
+import debounce from 'lodash.debounce'
 function Home() {
 
 
@@ -18,7 +18,13 @@ function Home() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [sessionUser, setSessionUser] = useState('');
+
   const chatBoxRef = useRef(null);
+  const token = localStorage.getItem('token');
+
+  const [results, setResults] = useState([]);
+
+
 
   const userdata = async () => {
     setLoading(true);
@@ -38,34 +44,34 @@ function Home() {
       setLoading(false);
     }
   };
-
-
+ 
   useEffect(() => {
     userdata();
   }, []);
 
 
   const chatshow = async (e) => {
-    const userString = e.currentTarget.getAttribute('data-user');
-    const userObject = JSON.parse(userString);
-    setSingleUser(userObject);
-    setSelectedUserId(userObject.user_id);
 
-    socket.emit('joinRoom', userObject.user_id);
+    const userId = e.target.id;
+
+  
+    setSelectedUserId(userId);
+
+    socket.emit('joinRoom', userId);
 
     try {
-      const token = localStorage.getItem('token');
+     
       const response = await axios.post(
         'http://localhost:9999/getmessage',
-        { receiverId: userObject.user_id },
+        { receiverId: userId },
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         }
       );
-
-      const allMessages = response.data.flatMap(chat => chat.messages);
+      setSingleUser(response.data.userdata[0]);
+      const allMessages = response.data.data.flatMap(chat => chat.messages);
       setMessage(allMessages);
     } catch (error) {
       console.log('Error fetching messages: ', error);
@@ -78,25 +84,29 @@ function Home() {
         setMessage(prevMessages => [...prevMessages, incomingMessage]);
       }
     });
-
+  
     return () => {
       socket.off('receiveMessage');
     };
   }, [selectedUserId]);
-
+  
+   
   const chatsend = (e) => {
     e.preventDefault();
-
+  
     if (selectedUserId) {
       try {
         const newMessage = {
           content: mssg,
           receiverId: selectedUserId,
-          senderId: sessionUser.user_id,
+          senderId: sessionUser.user_id, 
           timestamp: new Date(),
         };
-        socket.emit('sendMessage', newMessage);
+  
 
+
+        socket.emit('sendMessage', newMessage);
+  
         setMssg('');
       } catch (error) {
         console.log('Error sending message: ', error);
@@ -111,25 +121,67 @@ function Home() {
     chatBoxRef.current?.scrollTo(0, chatBoxRef.current.scrollHeight);
   }, [message]);
 
-  // ############################  friend searchlist ##########################
 
 
+// #############################  search friend ######################
+// const debouncedSearch = useCallback(debounce((input) => addSearch(input), 300), []);
 
+const addSearch = async(e)=>{
+  const userkey = e.target.value
+  if (userkey.trim() !== '') {
+    debouncedAddSearch(userkey);
+  } else {
+    setResults([]);
+  }
+  
+}
 
-
-
-
-
-
-
-
-
-
+const debouncedAddSearch = useCallback(
+    debounce(async (userkey) => {
+      try {
+        const response = await axios.post(
+          'http://localhost:9999/searchfriend',
+          { userkey },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        setResults(response.data.data);
+      } catch (error) {
+        console.error('Error searching for users:', error);
+      }
+    }, 300), 
+    []
+  );
 
 
 
   return (
     <>
+
+{/* search start */}
+    
+ <div>
+      <input 
+        type="text"  
+        onChange={addSearch} 
+        placeholder="Search for friends" 
+        style={{ position: 'relative', zIndex: 10 }} 
+      />
+      <ul style={{ position: 'relative', zIndex: 10 }}>
+        {results.map((user) => (
+          <li key={user._id}>{user.username} ({user.email})</li>
+        ))}
+      </ul>
+    </div>
+
+
+{/* search end */}
+
+
+
       <div style={{ display: 'flex' }}>
         <ul>
           {loading ? (
@@ -142,7 +194,6 @@ function Home() {
                 style={{ border: '1px solid black', width: '30vw', height: '60px', listStyle: 'none' }}
                 key={item.user_id}
                 id={item.user_id}
-                data-user={JSON.stringify(item)}
                 onClick={chatshow}
               >
                 {item.username}

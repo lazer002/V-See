@@ -17,13 +17,13 @@ const authMiddleware = require('../auth/authMiddleware')
 
 
 
+
 router.get('/getuser', authMiddleware, async (req, res) => {
   try {
 
-
-    const user = { email: req.email, user_id: req.user_id }
+  const user = {email:req.email,user_id:req.user_id}
     const data = await newuser.find({});
-    return res.status(200).json({ data, user });
+    return res.status(200).json({data,user});
   } catch (error) {
     console.log('error: ', error);
     return res.status(500).json({ msg: 'Server error' });
@@ -42,7 +42,9 @@ router.post('/getmessage', authMiddleware, async (req, res) => {
       ]
     });
 
-    return res.status(200).json(data);
+    const userdata = await newuser.find({user_id:receiverId});
+    
+    return res.status(200).json({data,userdata});
   } catch (error) {
     console.log('error: ', error);
     res.status(500).json({ msg: 'Server error' });
@@ -118,7 +120,7 @@ router.post('/userProfile', async (req, res) => {
   try {
 
     const { userId } = req.body
-    data = await newuser.findOne({ _id: userId })
+    data = await newuser.findOne({ _id:userId })
     return res.status(200).json(data)
   } catch (error) {
     console.log('error: ', error);
@@ -144,10 +146,10 @@ router.post('/updateUser', upload.single('Profile'), async (req, res) => {
     const updateData = { username, email };
 
     if (profileImage) {
-
-      updateData.Profile = profileImage.path;
+      
+      updateData.Profile = profileImage.path; 
     }
-
+    
     console.log('updateData:', updateData);
 
     const updatedUser = await newuser.findByIdAndUpdate(userId, updateData, { new: true });
@@ -181,10 +183,10 @@ router.post('/signup', async (req, res) => {
 
         const user_id = `user_${Math.floor(Math.random() * 1000000)}`
 
-        const data = new newuser({ email, password: be, username, user_id, Profile: '' })
+        const data = new newuser({ email, password: be, username, user_id,Profile:'' })
         const token = jweb.sign({ email: email }, secret)
+        // console.log(token)
         await data.save()
-        
         res.json({ token })
       })
 
@@ -216,6 +218,34 @@ router.post('/signin', async (req, res) => {
     console.log(error)
   }
 })
+
+
+// ############################  seacrh friend ####################
+
+
+router.post('/searchfriend', authMiddleware, async (req, res) => {
+  try {
+    const { userkey } = req.body;
+    console.log('userkey: ', userkey);
+
+    const data = await newuser.find({ 
+      $or: [ 
+        { username: { $regex: userkey, $options: 'i' } },  
+        { email: { $regex: userkey, $options: 'i' } }      
+      ] 
+    });
+
+    if (data.length === 0) {
+      return res.status(404).json({ msg: 'No users found' });
+    }
+
+    return res.status(200).json({ data });
+  } catch (error) {
+    console.log('error: ', error);
+    return res.status(500).json({ msg: 'Server error' });
+  }
+});
+
 
 
 
