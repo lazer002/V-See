@@ -80,7 +80,7 @@ function Home() {
 
   useEffect(() => {
     socket.on('receiveMessage', (incomingMessage) => {
-      if (incomingMessage.receiverId === selectedUserId || incomingMessage.senderId === selectedUserId) {
+      if (incomingMessage.senderId !== sessionUser.user_id || incomingMessage.receiverId === selectedUserId) {
         setMessage(prevMessages => [...prevMessages, incomingMessage]);
       }
     });
@@ -88,7 +88,7 @@ function Home() {
     return () => {
       socket.off('receiveMessage');
     };
-  }, [selectedUserId]);
+  }, [selectedUserId, sessionUser.user_id]);
   
    
   const chatsend = (e) => {
@@ -103,11 +103,14 @@ function Home() {
           timestamp: new Date(),
         };
   
-
-
+        // Send the message to the backend via Socket.IO
         socket.emit('sendMessage', newMessage);
   
+        // Clear the input field after sending the message
         setMssg('');
+  
+        // Do NOT add the message to the state here.
+        // Instead, wait for the server to send it back via socket.on('receiveMessage').
       } catch (error) {
         console.log('Error sending message: ', error);
         alert('Failed to send message. Please try again.');
@@ -116,6 +119,7 @@ function Home() {
       alert('Please select a user to chat with.');
     }
   };
+  
 
   useEffect(() => {
     chatBoxRef.current?.scrollTo(0, chatBoxRef.current.scrollHeight);
@@ -216,6 +220,7 @@ const debouncedAddSearch = useCallback(
             {message.map((mg, i) => (
               <div
                 key={i}
+                id={i}
                 style={{
                   display: 'flex',
                   justifyContent: mg.senderId === selectedUserId ? 'flex-start' : 'flex-end',

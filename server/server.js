@@ -32,12 +32,13 @@ io.on('connection', (socket) => {
 
   socket.on('sendMessage', async (message) => {
     try {
-      console.log('fwiahfiwahfiwhaf',message);
+    
       let chat = await Chat.findOne({
         $or: [
           { user1Id: message.senderId, user2Id: message.receiverId },
           { user1Id: message.receiverId, user2Id: message.senderId }
         ]
+        
       });
 
       if (!chat) {
@@ -46,6 +47,7 @@ io.on('connection', (socket) => {
           user2Id: message.receiverId,
           messages: [message],
         });
+        
       } else {
         chat.messages.push(message);
       }
