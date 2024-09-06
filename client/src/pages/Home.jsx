@@ -129,17 +129,16 @@ function Home() {
 
 const addSearch = async(e)=>{
   const userkey = e.target.value
-  if (userkey.trim() !== '') {
-    debouncedAddSearch(userkey);
-  } else {
-    setResults([]);
-  }
-  
+    debouncedAddSearch(userkey); 
 }
 
 const debouncedAddSearch = useCallback(
     debounce(async (userkey) => {
       try {
+        if (userkey.trim() === '') {
+          setResults([]);
+          return;
+        }
         const response = await axios.post(
           'http://localhost:9999/searchfriend',
           { userkey },
@@ -152,10 +151,34 @@ const debouncedAddSearch = useCallback(
         setResults(response.data.data);
       } catch (error) {
         console.error('Error searching for users:', error);
+        setResults([]);
       }
-    }, 300), 
+    }, 1000), 
     []
   );
+
+
+
+  // ###############################  add friend ######################################
+
+  const addfriend =async (e)=>{
+const userId = e.target.id
+try {
+
+  const response = await axios.post(
+    'http://localhost:9999/addfriend',
+    { userId },
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+} catch (error) {
+  console.error('Error cant add user:', error);
+
+}
+  }
 
 
 
@@ -164,18 +187,18 @@ const debouncedAddSearch = useCallback(
 
 {/* search start */}
     
- <div>
+ <div style={{position:'relative'}}>
       <input 
         type="text"  
         onChange={addSearch} 
         placeholder="Search for friends" 
         style={{ position: 'relative', zIndex: 10 }} 
       />
-      <ul style={{ position: 'relative', zIndex: 10 }}>
+      <div style={{ position: 'absolute', zIndex: 10 }}>
         {results.map((user) => (
-          <li key={user._id}>{user.username} ({user.email})</li>
+          <div key={user.user_id} style={{backgroundColor:'gray', padding:'10px 15px'}} >{user.username} <button type="submit" onClick={addfriend}  id={user.user_id}>Add</button></div>
         ))}
-      </ul>
+      </div>
     </div>
 
 

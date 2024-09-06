@@ -21,9 +21,15 @@ const authMiddleware = require('../auth/authMiddleware')
 router.get('/getuser', authMiddleware, async (req, res) => {
   try {
 
-  const user = {email:req.email,user_id:req.user_id}
-    const data = await newuser.find({});
-    return res.status(200).json({data,user});
+
+    // const token = req.headers.authorization.split(' ')[1];
+    // const sessionUser = jwt.verify(token, 'your_jwt_secret');
+
+
+    const user = { email: req.email, user_id: req.user_id };
+    const data = await newuser.find({ user_id: { $ne: req.user_id } });
+    return res.status(200).json({ data, user });
+
   } catch (error) {
     console.log('error: ', error);
     return res.status(500).json({ msg: 'Server error' });
@@ -237,6 +243,30 @@ router.post('/searchfriend', authMiddleware, async (req, res) => {
 
     if (data.length === 0) {
       return res.status(404).json({ msg: 'No users found' });
+    }
+
+    return res.status(200).json({ data });
+  } catch (error) {
+    console.log('error: ', error);
+    return res.status(500).json({ msg: 'Server error' });
+  }
+});
+
+
+// ################################## add friend ################################
+router.post('/addfriend', authMiddleware, async (req, res) => {
+  try {
+    const { userId } = req.body;
+    const sessionUserId = req.user_id;
+
+    const data = await newuser.findOneAndUpdate(
+      { user_id: userId },
+      { $addToSet: { friend_requests: { from_user: sessionUserId, status: 'pending' } } },
+      { new: true }
+    );
+
+    if (!data) {
+      return res.status(404).json({ msg: 'User not found' });
     }
 
     return res.status(200).json({ data });

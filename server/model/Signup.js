@@ -1,43 +1,45 @@
-const mon = require('mongoose')
+const mongoose = require('mongoose');
 
-let userschema = new mon.Schema({
-    email: {
-        type: String,
-        required: true
+let userschema = new mongoose.Schema({
+  email: {
+    type: String,
+    required: true,
+    unique: true
+  },
+  password: {
+    type: String,
+    required: true
+  },
+  username: {
+    type: String,
+    required: true
+  },
+  user_role: {
+    type: String,
+    required: true,
+    default: false
+  },
+  user_id: {
+    type: String,
+    required: true,
+    unique: true
+  },
+  profile: {
+    type: String
+  },
+  friend_requests: [{
+    from_user: {
+      type:String,
+      ref: 'User'
     },
-    password: {
-        type: String,
-        required: true
-    },
-    username: {
-        type: String,
-        required: true
-    },
-    user_role: {
-        type: String,
-        required: true,
-        default: 'false'
-    },
-    user_id: {
-        type: String,
-        required: true,
-    },
-    Profile: {
-        type: String,
+    status: {
+      type: String,
+      enum: ['pending', 'accepted', 'rejected'],
+      default: 'pending'
+    }
+  }]
+});
 
-    },
-    friend_request: [{
-        request: {
-            type: String
-        },
-      
-        friend_list: [{
-            type: String
-        }]
-    }]
-   
-})
+let User = mongoose.model('User', userschema);
 
-let User = mon.model('User', userschema)
-
-module.exports = User
+module.exports = User;
