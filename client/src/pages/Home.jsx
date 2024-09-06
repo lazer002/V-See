@@ -103,14 +103,11 @@ function Home() {
           timestamp: new Date(),
         };
   
-        // Send the message to the backend via Socket.IO
         socket.emit('sendMessage', newMessage);
   
-        // Clear the input field after sending the message
+   
         setMssg('');
   
-        // Do NOT add the message to the state here.
-        // Instead, wait for the server to send it back via socket.on('receiveMessage').
       } catch (error) {
         console.log('Error sending message: ', error);
         alert('Failed to send message. Please try again.');
