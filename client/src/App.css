@@ -1,11 +1,13 @@
-.profile_icon{border: 1px solid green;
-height: 200px;
-width: 200px;
-border-radius: 50%;
-position: relative;
-overflow: hidden;
+.profile_icon {
+    border: 1px solid green;
+    height: 200px;
+    width: 200px;
+    border-radius: 50%;
+    position: relative;
+    overflow: hidden;
 }
-#profile_edit{
+
+#profile_edit {
     position: absolute;
     font-size: 30px;
     top: 40;
@@ -16,5 +18,22 @@ overflow: hidden;
     background-color: green;
     cursor: pointer;
 }
-#profile_image{width: 100%;
+
+#profile_image {
+    width: 100%;
+}
+
+
+.EmojiPickerReact {
+    height: 450px;
+    width: 350px;
+    position: absolute;
+    bottom: 74px;
+    right: 47px;
+}
+
+aside.EmojiPickerReact {
+    position: absolute;
+    bottom: 95px;
+    left: 40px;
 }

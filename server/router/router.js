@@ -49,6 +49,7 @@ router.post('/getmessage', authMiddleware, async (req, res) => {
     });
 
     const userdata = await newuser.find({user_id:receiverId});
+    console.log('userdata: ', userdata);
     
     return res.status(200).json({data,userdata});
   } catch (error) {
@@ -189,7 +190,7 @@ router.post('/signup', async (req, res) => {
 
         const user_id = `user_${Math.floor(Math.random() * 1000000)}`
 
-        const data = new newuser({ email, password: be, username, user_id,Profile:'' })
+        const data = new newuser({ email, password: be, username, user_id })
         const token = jweb.sign({ email: email }, secret)
         // console.log(token)
         await data.save()

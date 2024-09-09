@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import io from 'socket.io-client';
 const socket = io('http://localhost:9999'); 
 import debounce from 'lodash.debounce'
+import { RiSendPlaneFill ,RiEmojiStickerFill   } from 'react-icons/ri';
 function Home() {
 
 
@@ -184,90 +185,101 @@ try {
 
   return (
     <>
+       <div className="flex py-4 border sticky top-0 z-10 bg-slate-400">
+        <div className="w-1/3 text-center">
+
 
 {/* search start */}
     
- <div style={{position:'relative'}}>
+ <div className=' relative'>
       <input 
         type="text"  
         onChange={addSearch} 
         placeholder="Search for friends" 
-        style={{ position: 'relative', zIndex: 10 }} 
+        className='p-2 w-8/12 rounded-lg' 
       />
-      <div style={{ position: 'absolute', zIndex: 10 }}>
+      <div className=' absolute z-10'>
         {results.map((user) => (
-          <div key={user.user_id} style={{backgroundColor:'gray', padding:'10px 15px'}} >{user.username} <button type="submit" onClick={addfriend}  id={user.user_id}>Add</button></div>
+          <div key={user.user_id} className=' bg-blue-100 border-b border-blue-50 py-4 px-2' >{user.username} <button type="submit" onClick={addfriend}  id={user.user_id}>Add</button></div>
         ))}
       </div>
     </div>
 
 
 {/* search end */}
+</div>
+
+
+<div className=" w-2/3 ">
+          {/* chat profile */}
+          <div className="chatuser ">
+            <Link to={`/user/${singleUser.username}/${singleUser._id}`}>
+            <div className="flex">
+            <div>
+            <img src={`http://localhost:9999/${singleUser.profile}`} alt="" />  
+              </div>
+              <div>
+              {singleUser.username}
+              </div>
+            </div> 
+            </Link>
+          </div>
+
+        </div>
+      </div>
 
 
 
       <div style={{ display: 'flex' }}>
-        <ul>
+        <div className='w-1/3 h-screen bg-blue-100 p-2'>
           {loading ? (
-            <li>Loading...</li>
+            <div>Loading...</div>
           ) : error ? (
-            <li>{error}</li>
+            <div><button> Add friend + </button> </div>
           ) : (
             user.map((item) => (
-              <li
-                style={{ border: '1px solid black', width: '30vw', height: '60px', listStyle: 'none' }}
+              <div
+                className='py-5 my-2 rounded-lg bg-blue-200 border-b border-blue-50'
                 key={item.user_id}
                 id={item.user_id}
                 onClick={chatshow}
               >
                 {item.username}
-              </li>
+              </div>
             ))
           )}
-        </ul>
+        </div>
 
-        <div className="chatbody" style={{ position: 'relative' }}>
-          <div className="chatuser">
-            <Link to={`/user/${singleUser.username}/${singleUser._id}`}>
-              {singleUser.username}
-            </Link>
-          </div>
+        <div className="chatbody w-2/3 h-screen bg-blue-100 relative" >
+ 
           <div
             className="chatbox"
-            style={{ border: '1px solid black', width: '60vw', height: '90vh', overflowY: 'auto' }}
             ref={chatBoxRef}
           >
             {message.map((mg, i) => (
-              <div
-                key={i}
-                id={i}
-                style={{
-                  display: 'flex',
-                  justifyContent: mg.senderId === selectedUserId ? 'flex-start' : 'flex-end',
-                }}
-              >
-                <div
-                  style={{
-                    backgroundColor: mg.senderId === selectedUserId ? 'black' : 'green',
-                    margin: '4px',
-                    padding: '10px',
-                    borderRadius: '10px',
-                    color: 'white',
-                    maxWidth: '60%',
-                  }}
-                >
-                  {mg.content}
-                </div>
-              </div>
+          <div
+          key={i}
+          id={i}
+          className={`flex ${mg.senderId === selectedUserId ? 'justify-start' : 'justify-end'}`}
+        >
+          <div
+            className={`${
+              mg.senderId === selectedUserId ? 'bg-black' : 'bg-green-500'
+            } m-1 p-2 rounded-lg text-white max-w-[60%]`}
+          >
+            {mg.content}
+          </div>
+        </div>
+        
             ))}
           </div>
-          <div className="chatsend">
+          <div className="chatsend fixed flex justify-center gap-5 bottom-0 text-center py-5 bg-slate-300 w-2/3">
             <input
               type="text"
               name="mssg"
               value={mssg}
               id="mssg"
-              style={{ width: '40vw', height: '4vh' }}
+            className='w-3/4 py-3 rounded-lg'
               onChange={(e) => setMssg(e.target.value)}
             />
             <button
@@ -275,8 +287,9 @@ try {
               onClick={chatsend}
               style={{ width: '10vw', height: '4vh' }}
             >
-              Send
+            <RiSendPlaneFill  className='text-4xl'/>
             </button>
+            <RiEmojiStickerFill  className='text-4xl mt-1' onClick={() => setShowPicker((val) => !val)}/>
           </div>
         </div>
       </div>

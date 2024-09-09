@@ -24,8 +24,9 @@ let userschema = new mongoose.Schema({
     required: true,
     unique: true
   },
-  profile: {
-    type: String
+  Profile: {
+    type: String,
+    default:''
   },
   friend_requests: [{
     from_user: {

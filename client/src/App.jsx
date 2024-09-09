@@ -9,6 +9,7 @@ import Signup from './pages/Signup';
 import Forgot from './pages/Forgot'; 
 import { AuthContext } from './AuthContext';
 
+
 function App() {
   const { isLoggedIn } = useContext(AuthContext);
 
