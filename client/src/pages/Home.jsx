@@ -1,11 +1,14 @@
 
 import axios from 'axios';
-import React, { useEffect, useState, useRef,useCallback } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import io from 'socket.io-client';
-const socket = io('http://localhost:9999'); 
+const socket = io('http://localhost:9999');
 import debounce from 'lodash.debounce'
-import { RiSendPlaneFill ,RiEmojiStickerFill   } from 'react-icons/ri';
+import { RiSendPlaneFill, RiEmojiStickerFill, RiAttachment2 } from 'react-icons/ri';
+import pro from '/images/profile.jpeg';
+
+
 function Home() {
 
 
@@ -45,7 +48,7 @@ function Home() {
       setLoading(false);
     }
   };
- 
+
   useEffect(() => {
     userdata();
   }, []);
@@ -55,13 +58,13 @@ function Home() {
 
     const userId = e.target.id;
 
-  
+
     setSelectedUserId(userId);
 
     socket.emit('joinRoom', userId);
 
     try {
-     
+
       const response = await axios.post(
         'http://localhost:9999/getmessage',
         { receiverId: userId },
@@ -85,30 +88,30 @@ function Home() {
         setMessage(prevMessages => [...prevMessages, incomingMessage]);
       }
     });
-  
+
     return () => {
       socket.off('receiveMessage');
     };
   }, [selectedUserId, sessionUser.user_id]);
-  
-   
+
+
   const chatsend = (e) => {
     e.preventDefault();
-  
+
     if (selectedUserId) {
       try {
         const newMessage = {
           content: mssg,
           receiverId: selectedUserId,
-          senderId: sessionUser.user_id, 
+          senderId: sessionUser.user_id,
           timestamp: new Date(),
         };
-  
+
         socket.emit('sendMessage', newMessage);
-  
-   
+
+
         setMssg('');
-  
+
       } catch (error) {
         console.log('Error sending message: ', error);
         alert('Failed to send message. Please try again.');
@@ -117,7 +120,7 @@ function Home() {
       alert('Please select a user to chat with.');
     }
   };
-  
+
 
   useEffect(() => {
     chatBoxRef.current?.scrollTo(0, chatBoxRef.current.scrollHeight);
@@ -125,15 +128,15 @@ function Home() {
 
 
 
-// #############################  search friend ######################
-// const debouncedSearch = useCallback(debounce((input) => addSearch(input), 300), []);
+  // #############################  search friend ######################
+  // const debouncedSearch = useCallback(debounce((input) => addSearch(input), 300), []);
 
-const addSearch = async(e)=>{
-  const userkey = e.target.value
-    debouncedAddSearch(userkey); 
-}
+  const addSearch = async (e) => {
+    const userkey = e.target.value
+    debouncedAddSearch(userkey);
+  }
 
-const debouncedAddSearch = useCallback(
+  const debouncedAddSearch = useCallback(
     debounce(async (userkey) => {
       try {
         if (userkey.trim() === '') {
@@ -154,7 +157,7 @@ const debouncedAddSearch = useCallback(
         console.error('Error searching for users:', error);
         setResults([]);
       }
-    }, 1000), 
+    }, 1000),
     []
   );
 
@@ -162,67 +165,69 @@ const debouncedAddSearch = useCallback(
 
   // ###############################  add friend ######################################
 
-  const addfriend =async (e)=>{
-const userId = e.target.id
-try {
+  const addfriend = async (e) => {
+    const userId = e.target.id
+    try {
 
-  const response = await axios.post(
-    'http://localhost:9999/addfriend',
-    { userId },
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      const response = await axios.post(
+        'http://localhost:9999/addfriend',
+        { userId },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+    } catch (error) {
+      console.error('Error cant add user:', error);
+
     }
-  );
-} catch (error) {
-  console.error('Error cant add user:', error);
-
-}
   }
-
-
 
   return (
     <>
-       <div className="flex py-4 border sticky top-0 z-10 bg-slate-400">
-        <div className="w-1/3 text-center">
+      <div className="flex py-4 border sticky top-0 z-10 bg-slate-400 ">
+        <div className="w-1/4 text-center ">
 
 
-{/* search start */}
-    
- <div className=' relative'>
-      <input 
-        type="text"  
-        onChange={addSearch} 
-        placeholder="Search for friends" 
-        className='p-2 w-8/12 rounded-lg' 
-      />
-      <div className=' absolute z-10'>
-        {results.map((user) => (
-          <div key={user.user_id} className=' bg-blue-100 border-b border-blue-50 py-4 px-2' >{user.username} <button type="submit" onClick={addfriend}  id={user.user_id}>Add</button></div>
-        ))}
-      </div>
-    </div>
+          {/* search start */}
+
+          <div className=' relative'>
+            <input
+              type="text"
+              onChange={addSearch}
+              placeholder="Search for friends"
+              className='p-2 w-10/12 rounded-lg shadow-lg'
+            />
+            <div className=' absolute z-10'>
+              {results.map((user) => (
+                <div key={user.user_id} className=' bg-blue-100 border-b border-blue-50 py-4 px-2' >{user.username} <button type="submit" onClick={addfriend} id={user.user_id}>Add</button></div>
+              ))}
+            </div>
+          </div>
 
 
-{/* search end */}
-</div>
+          {/* search end */}
+        </div>
 
 
-<div className=" w-2/3 ">
+        <div className=" w-3/4 ">
           {/* chat profile */}
-          <div className="chatuser ">
-            <Link to={`/user/${singleUser.username}/${singleUser._id}`}>
-            <div className="flex">
-            <div>
-            <img src={`http://localhost:9999/${singleUser.profile}`} alt="" />  
-              </div>
-              <div>
-              {singleUser.username}
-              </div>
-            </div> 
-            </Link>
+          <div className="chatuser px-5">
+            {singleUser.username != undefined ? (
+              <Link to={`/user/${singleUser.username}/${singleUser._id}`}>
+                <div className="flex">
+
+                  <img src={singleUser.Profile != '' ? `http://localhost:9999/${singleUser.Profile}` : pro} alt="" className='w-10 h-10 rounded-full' />
+
+                  <div className='px-3 text-2xl font-bold'>
+                    {singleUser.username}
+                  </div>
+                </div>
+              </Link>
+
+            ) : ('')}
+
           </div>
 
         </div>
@@ -231,65 +236,88 @@ try {
 
 
       <div style={{ display: 'flex' }}>
-        <div className='w-1/3 h-screen bg-blue-100 p-2'>
+        <div className='w-1/4 h-screen bg-blue-100 p-2 border-gray-300 border-r overflow-y-auto'>
           {loading ? (
             <div>Loading...</div>
           ) : error ? (
-            <div><button> Add friend + </button> </div>
+            <div>{error} </div>
           ) : (
             user.map((item) => (
               <div
-                className='py-5 my-2 rounded-lg bg-blue-200 border-b border-blue-50'
+                className='py-5 my-2 rounded-lg bg-blue-200 border-b border-blue-50 shadow-sm flex'
                 key={item.user_id}
                 id={item.user_id}
-                onClick={chatshow}
+                onClick={chatshow}  
               >
-                {item.username}
+                <img 
+                  src={item.Profile !== '' ? `http://localhost:9999/${item.Profile}` : pro} 
+                  alt="" 
+                  className='w-10 h-10 rounded-full'
+                  onClick={(e) => e.stopPropagation()} 
+                />
+                <div 
+                  className='font-bold'
+                  onClick={(e) => e.stopPropagation()} 
+                > 
+                  {item.username}
+                </div>
               </div>
             ))
           )}
         </div>
 
-        <div className="chatbody w-2/3 h-screen bg-blue-100 relative" >
- 
-          <div
-            className="chatbox"
-            ref={chatBoxRef}
-          >
+        <div className="chatbody w-3/4 h-screen bg-blue-100 relative" >
+
+
+
+          <div className="chatbox overflow-auto" ref={chatBoxRef}>
             {message.map((mg, i) => (
-          <div
-          key={i}
-          id={i}
-          className={`flex ${mg.senderId === selectedUserId ? 'justify-start' : 'justify-end'}`}
-        >
-          <div
-            className={`${
-              mg.senderId === selectedUserId ? 'bg-black' : 'bg-green-500'
-            } m-1 p-2 rounded-lg text-white max-w-[60%]`}
-          >
-            {mg.content}
-          </div>
-        </div>
-        
+              <div
+                key={i}
+                id={i}
+                className={`flex items-start gap-2 ${mg.senderId === selectedUserId ? 'justify-start' : 'justify-end'}`}
+              >
+                {mg.senderId === selectedUserId && (
+                  <img
+                    src={singleUser.Profile !== '' ? `http://localhost:9999/${singleUser.Profile}` : pro}
+                    alt="User Profile"
+                    className="w-10 h-10 rounded-full"
+                  />
+                )}
+
+                <div
+                  className={`${mg.senderId === selectedUserId ? 'bg-black' : 'bg-green-500'
+                    } ms-1 mt-1 mb-2 p-2 rounded-lg text-white max-w-[60%] md:max-w-[60%] sm:max-w-[90%]`}
+                >
+                  {mg.content}
+                </div>
+              </div>
             ))}
           </div>
-          <div className="chatsend fixed flex justify-center gap-5 bottom-0 text-center py-5 bg-slate-300 w-2/3">
+
+
+
+
+          <div className="chatsend fixed flex justify-start gap-5  bottom-0 text-center p-5 bg-slate-300 w-3/4">
+            <button><RiAttachment2 className='text-3xl mt-1' /> </button>
             <input
               type="text"
               name="mssg"
               value={mssg}
               id="mssg"
-            className='w-3/4 py-3 rounded-lg'
+              className='w-11/12 p-3 rounded-lg '
+              placeholder='Type your message and press enter'
               onChange={(e) => setMssg(e.target.value)}
             />
-            <button
-              type="submit"
-              onClick={chatsend}
-              style={{ width: '10vw', height: '4vh' }}
-            >
-            <RiSendPlaneFill  className='text-4xl'/>
-            </button>
-            <RiEmojiStickerFill  className='text-4xl mt-1' onClick={() => setShowPicker((val) => !val)}/>
+
+
+            <div className='flex px-2 pt-1 justify-evenly'>
+              <button><RiSendPlaneFill className='text-4xl mx-2' onClick={chatsend} /></button>
+
+              <button>  <RiEmojiStickerFill className='text-4xl mx-2' onClick={() => setShowPicker((val) => !val)} /></button>
+            </div>
+
+
           </div>
         </div>
       </div>
@@ -298,3 +326,5 @@ try {
 }
 
 export default Home;
+
+// 

@@ -67,6 +67,7 @@ function Profile() {
       if (response.data.Profile) {
         setImage(`http://localhost:9999/${response.data.Profile}`);
       }
+      alert('profile updated toaster bad m lgaunga ')
     } catch (error) {
       console.error('Error updating user data:', error);
     }
