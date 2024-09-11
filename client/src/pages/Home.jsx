@@ -254,7 +254,7 @@ const chatsend = (e) => {
         </div>
 
 
-        <div className=" w-3/4 ">
+        <div className=" w-3/4 flex justify-between">
           {/* chat profile */}
           <div className="chatuser px-5">
             {singleUser.username != undefined ? (
