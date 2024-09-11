@@ -103,6 +103,19 @@ function Home() {
   }, [selectedUserId, sessionUser.user_id]);
 
 
+  const formatTimestamp = (timestamp) => {
+    const date = new Date(timestamp); 
+       const options = {
+      timeZone: 'Asia/Kolkata',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    };
+     return date.toLocaleTimeString('en-US', options);
+  };
+
+
+
 
   // ###############################  chat send ######################################
 
@@ -199,9 +212,14 @@ const chatsend = (e) => {
 
 
   const onEmojiClick = (emojiObject) => {
+    console.log('emojiObject.emoji: ', emojiObject.emoji);
     setMssg((prevMssg) => prevMssg + emojiObject.emoji); 
     setShowPicker(false);
   };;
+
+
+// 
+
 
 
 
@@ -209,7 +227,7 @@ const chatsend = (e) => {
   return (
     <>
     
-      <div className="flex py-4 border sticky top-0 z-10 bg-slate-400 ">
+      <div className="flex py-4 border sticky top-0 z-10 bg-blue-50 shadow-md">
         <div className="w-1/4 text-center ">
 
 
@@ -220,7 +238,7 @@ const chatsend = (e) => {
               type="text"
               onChange={addSearch}
               placeholder="Search for friends"
-              className='p-2 w-10/12 rounded-lg shadow-lg'
+              className='p-2 w-10/12 rounded-lg shadow-sm'
             />
             <div className=' absolute z-10'>
               {results.map((user) => (
@@ -243,7 +261,7 @@ const chatsend = (e) => {
 
                   <img src={singleUser.Profile != '' ? `http://localhost:9999/${singleUser.Profile}` : pro} alt="" className='w-10 h-10 rounded-full' />
 
-                  <div className='px-3 text-2xl font-medium'>
+                  <div className='px-3 text-2xl text-blue-500 font-medium'>
                     {singleUser.username}
                   </div>
                 </div>
@@ -259,7 +277,7 @@ const chatsend = (e) => {
 
 
       <div style={{ display: 'flex' }}>
-        <div className='w-1/4 h-screen bg-blue-100 p-2 border-gray-300 border-r overflow-y-auto'>
+        <div className='w-1/4 h-screen bg-blue-100 p-2 border-blue-300 border-r overflow-y-auto'>
           {loading ? (
             <div>Loading...</div>
           ) : error ? (
@@ -267,7 +285,7 @@ const chatsend = (e) => {
           ) : (
             user.map((item) => (
               <div
-                className='py-5 my-2 rounded-lg bg-blue-200 border-b border-blue-50 shadow-sm flex'
+                className='py-5 ps-5 my-2 rounded-lg bg-blue-300 border-b border-blue-50 shadow-sm flex'
                 key={item.user_id}
                 id={item.user_id}
                 onClick={chatshow}  
@@ -279,7 +297,7 @@ const chatsend = (e) => {
                   onClick={(e) => e.stopPropagation()} 
                 />
                 <div 
-                  className='font-medium ps-4 text-lg'
+                  className='font-medium text-gray-800 ps-4 text-lg'
                   onClick={(e) => e.stopPropagation()} 
                 > 
                   {item.username}
@@ -296,6 +314,7 @@ const chatsend = (e) => {
 <div className="chatbox overflow-auto" ref={chatBoxRef}>
   {message.map((mg, i) => {
     const isNewBlock = i === 0 || message[i - 1].senderId !== mg.senderId;
+    const formattedTime = formatTimestamp(mg.timestamp);
 
     return (
       <div key={i} className={`flex ${mg.senderId === selectedUserId ? 'justify-start' : 'justify-end'} gap-2`}>
@@ -311,9 +330,9 @@ const chatsend = (e) => {
 
         <div className="flex flex-col">
           <div
-            className={`${mg.senderId === selectedUserId ? 'bg-black' : 'bg-green-500'} ms-1 mt-1 mb-2 p-2 rounded-lg text-white`}
+            className={`${mg.senderId === selectedUserId ? 'bg-slate-50 text-gray-700' : 'bg-blue-400 text-white me-2'} ms-1 mt-1 mb-2 p-3 rounded-lg shadow-sm relative pe-12`}
           >
-            {mg.content}
+            {mg.content} <span className='text-[9px] absolute right-2 bottom-[-1px]'>{formattedTime}</span>
           </div>
         </div>
       </div>
@@ -325,8 +344,8 @@ const chatsend = (e) => {
 {/* 11 */}
 
 
-          <div className={`chatsend fixed flex justify-start gap-5  bottom-0 text-center p-5 bg-slate-300 w-3/4 ${selectedUserId ? 'block' : 'hidden'}`}>
-            <button><RiAttachment2 className='text-3xl mt-1' /> </button>
+          <div className={`chatsend fixed flex justify-start gap-5  bottom-0 text-center p-5 bg-white w-3/4 ${selectedUserId ? 'block' : 'hidden'}`}>
+            <button><RiAttachment2 className='text-3xl mt-1 text-blue-500' /> </button>
             <input
               type="text"
               name="mssg"
@@ -335,13 +354,18 @@ const chatsend = (e) => {
               className='w-11/12 p-3 rounded-lg '
               placeholder='Type your message and press enter'
               onChange={(e) => setMssg(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  chatsend(e); 
+                }
+              }}
             />
 
 
             <div className='flex px-2 pt-1 justify-evenly'>
-              <button><RiSendPlaneFill className='text-4xl mx-2' onClick={chatsend} /></button>
+              <button><RiSendPlaneFill className='text-4xl mx-2 text-blue-500' onClick={chatsend} /></button>
 
-              <button>  <RiEmojiStickerFill className='text-4xl mx-2' onClick={() => setShowPicker((val) => !val)} /></button>
+              <button>  <RiEmojiStickerFill className='text-4xl mx-2  text-blue-500' onClick={() => setShowPicker((val) => !val)} /></button>
             </div>
 
 
