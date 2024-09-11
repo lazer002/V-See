@@ -5,7 +5,9 @@ import { Link } from 'react-router-dom';
 import io from 'socket.io-client';
 const socket = io('http://localhost:9999');
 import debounce from 'lodash.debounce'
-import { RiSendPlaneFill, RiEmojiStickerFill, RiAttachment2 } from 'react-icons/ri';
+import { RiSendPlaneFill, RiEmojiStickerFill, RiAttachment2,RiVideoAddFill  } from 'react-icons/ri';
+import { FiPhoneCall } from "react-icons/fi";
+import { HiDotsVertical } from "react-icons/hi";
 import pro from '/images/profile.jpeg';
 import  EmojiPicker  from 'emoji-picker-react';
 
@@ -271,6 +273,12 @@ const chatsend = (e) => {
 
           </div>
 
+          <div className={`flex justify-end gap-7 text-3xl px-3 text-blue-500 ${selectedUserId ? '' : 'hidden'}`}>
+<FiPhoneCall/> 
+<RiVideoAddFill />
+<HiDotsVertical/>
+          </div>
+
         </div>
       </div>
 
@@ -307,7 +315,7 @@ const chatsend = (e) => {
           )}
         </div>
 
-        <div className="chatbody w-3/4 h-screen bg-blue-100 relative" >
+        <div className="chatbody w-3/4 h-screen bg-blue-100 relative " >
 
 {/* 11 */}
 
