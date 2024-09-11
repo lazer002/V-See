@@ -7,7 +7,7 @@ const socket = io('http://localhost:9999');
 import debounce from 'lodash.debounce'
 import { RiSendPlaneFill, RiEmojiStickerFill, RiAttachment2 } from 'react-icons/ri';
 import pro from '/images/profile.jpeg';
-
+import  EmojiPicker  from 'emoji-picker-react';
 
 function Home() {
 
@@ -22,12 +22,16 @@ function Home() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [sessionUser, setSessionUser] = useState('');
-
-  const chatBoxRef = useRef(null);
   const token = localStorage.getItem('token');
-
   const [results, setResults] = useState([]);
+  const [showPicker, setShowPicker] = useState(false);
+  const chatBoxRef = useRef(null);
 
+
+
+
+
+  // ###############################  friend list ######################################
 
 
   const userdata = async () => {
@@ -52,6 +56,10 @@ function Home() {
   useEffect(() => {
     userdata();
   }, []);
+
+
+
+  // ###############################  chat  show ######################################
 
 
   const chatshow = async (e) => {
@@ -95,7 +103,11 @@ function Home() {
   }, [selectedUserId, sessionUser.user_id]);
 
 
-  const chatsend = (e) => {
+
+  // ###############################  chat send ######################################
+
+
+const chatsend = (e) => {
     e.preventDefault();
 
     if (selectedUserId) {
@@ -184,8 +196,19 @@ function Home() {
     }
   }
 
+
+
+  const onEmojiClick = (emojiObject) => {
+    setMssg((prevMssg) => prevMssg + emojiObject.emoji); 
+    setShowPicker(false);
+  };;
+
+
+
+
   return (
     <>
+    
       <div className="flex py-4 border sticky top-0 z-10 bg-slate-400 ">
         <div className="w-1/4 text-center ">
 
@@ -220,7 +243,7 @@ function Home() {
 
                   <img src={singleUser.Profile != '' ? `http://localhost:9999/${singleUser.Profile}` : pro} alt="" className='w-10 h-10 rounded-full' />
 
-                  <div className='px-3 text-2xl font-bold'>
+                  <div className='px-3 text-2xl font-medium'>
                     {singleUser.username}
                   </div>
                 </div>
@@ -256,7 +279,7 @@ function Home() {
                   onClick={(e) => e.stopPropagation()} 
                 />
                 <div 
-                  className='font-bold'
+                  className='font-medium ps-4 text-lg'
                   onClick={(e) => e.stopPropagation()} 
                 > 
                   {item.username}
@@ -268,37 +291,41 @@ function Home() {
 
         <div className="chatbody w-3/4 h-screen bg-blue-100 relative" >
 
+{/* 11 */}
 
+<div className="chatbox overflow-auto" ref={chatBoxRef}>
+  {message.map((mg, i) => {
+    const isNewBlock = i === 0 || message[i - 1].senderId !== mg.senderId;
 
-          <div className="chatbox overflow-auto" ref={chatBoxRef}>
-            {message.map((mg, i) => (
-              <div
-                key={i}
-                id={i}
-                className={`flex items-start gap-2 ${mg.senderId === selectedUserId ? 'justify-start' : 'justify-end'}`}
-              >
-                {mg.senderId === selectedUserId && (
-                  <img
-                    src={singleUser.Profile !== '' ? `http://localhost:9999/${singleUser.Profile}` : pro}
-                    alt="User Profile"
-                    className="w-10 h-10 rounded-full"
-                  />
-                )}
+    return (
+      <div key={i} className={`flex ${mg.senderId === selectedUserId ? 'justify-start' : 'justify-end'} gap-2`}>
+        {isNewBlock && mg.senderId === selectedUserId ? (
+          <img
+            src={singleUser.Profile !== '' ? `http://localhost:9999/${singleUser.Profile}` : pro}
+            alt="User Profile"
+            className="w-10 h-10 rounded-full"
+          />
+        ) : (
+          <div className="w-10"></div>
+        )}
 
-                <div
-                  className={`${mg.senderId === selectedUserId ? 'bg-black' : 'bg-green-500'
-                    } ms-1 mt-1 mb-2 p-2 rounded-lg text-white max-w-[60%] md:max-w-[60%] sm:max-w-[90%]`}
-                >
-                  {mg.content}
-                </div>
-              </div>
-            ))}
+        <div className="flex flex-col">
+          <div
+            className={`${mg.senderId === selectedUserId ? 'bg-black' : 'bg-green-500'} ms-1 mt-1 mb-2 p-2 rounded-lg text-white`}
+          >
+            {mg.content}
           </div>
+        </div>
+      </div>
+    );
+  })}
+</div>
 
 
+{/* 11 */}
 
 
-          <div className="chatsend fixed flex justify-start gap-5  bottom-0 text-center p-5 bg-slate-300 w-3/4">
+          <div className={`chatsend fixed flex justify-start gap-5  bottom-0 text-center p-5 bg-slate-300 w-3/4 ${selectedUserId ? 'block' : 'hidden'}`}>
             <button><RiAttachment2 className='text-3xl mt-1' /> </button>
             <input
               type="text"
@@ -319,6 +346,11 @@ function Home() {
 
 
           </div>
+          {showPicker && (
+  <div className="emoji-picker-container">
+    <EmojiPicker onEmojiClick={onEmojiClick} />
+  </div>
+)}
         </div>
       </div>
     </>
