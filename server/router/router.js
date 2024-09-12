@@ -49,7 +49,7 @@ router.post('/getmessage', authMiddleware, async (req, res) => {
     });
 
     const userdata = await newuser.find({user_id:receiverId});
-    console.log('userdata: ', userdata);
+   
     
     return res.status(200).json({data,userdata});
   } catch (error) {
@@ -59,59 +59,62 @@ router.post('/getmessage', authMiddleware, async (req, res) => {
 });
 
 
-const createOrUpdateChat = async (user1Id, user2Id, message) => {
-  try {
-    let chat = await Chat.findOne({
-      $or: [
-        { user1Id, user2Id },
-        { user1Id: user2Id, user2Id: user1Id }
-      ]
-    });
+// const createOrUpdateChat = async (user1Id, user2Id, message) => {
+//   console.log(message,'messagemessagemessagemessagemessage');
+//   try {
+//     let chat = await Chat.findOne({
+//       $or: [
+//         { user1Id, user2Id },
+//         { user1Id: user2Id, user2Id: user1Id }
+//       ]
+//     });
 
-    if (!chat) {
-      chat = new Chat({
-        user1Id,
-        user2Id,
-        messages: [message],
-      });
-    } else {
-      chat.messages.push(message);
-    }
+//     if (!chat) {
+//       chat = new Chat({
+//         user1Id,
+//         user2Id,
+//         messages: [message],
+//       });
+//     } else {
+//       chat.messages.push(message);
+//     }
 
-    await chat.save();
-    return chat;
-  } catch (error) {
-    console.error('Error creating or updating chat:', error);
-    throw error;
-  }
-};
+//     await chat.save();
+//     return chat;
+//   } catch (error) {
+//     console.error('Error creating or updating chat:', error);
+//     throw error;
+//   }
+// };
 
 
-router.post('/createChat', authMiddleware, async (req, res) => {
-  try {
+// router.post('/createChat', authMiddleware, async (req, res) => {
+//   try {
 
-    const { content, receiverId } = req.body;
-    const senderId = req.user_id;
-    console.log(content, senderId, receiverId);
+//     const { content, receiverId } = req.body;
+//     const senderId = req.user_id;
+//     console.log(content, senderId, receiverId,'fwafwaf');
 
-    if (!content || !senderId || !receiverId) {
-      return res.status(400).json({ msg: 'All fields are required.' });
-    }
+//     if (!content || !senderId || !receiverId) {
+//       return res.status(400).json({ msg: 'All fields are required.' });
+//     }
 
-    const message = {
-      senderId,
-      content,
-      timestamp: new Date(),
-    };
+//     const message = {
+//       senderId,
+//       content,
+//       fileUrl,
+//       timestamp: new Date(),
+//     };
 
-    const chat = await createOrUpdateChat(senderId, receiverId, message);
+//     console.log(senderId, receiverId, message,'senderId, receiverId, message');
+//     const chat = await createOrUpdateChat(senderId, receiverId, message);
 
-    res.status(201).json({ msg: 'Chat created or updated successfully', chat });
-  } catch (error) {
-    console.log('Error: ', error);
-    res.status(500).json({ msg: 'Server error' });
-  }
-});
+//     res.status(201).json({ msg: 'Chat created or updated successfully', chat });
+//   } catch (error) {
+//     console.log('Error: ', error);
+//     res.status(500).json({ msg: 'Server error' });
+//   }
+// });
 
 
 

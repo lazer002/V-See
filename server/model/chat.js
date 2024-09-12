@@ -28,6 +28,9 @@ const chatSchema = new mongoose.Schema(
     messages: [messageSchema],
   },
   {
+    fileUrl: String
+  },
+  {
     timestamps: true,
   }
 );

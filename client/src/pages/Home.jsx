@@ -5,11 +5,11 @@ import { Link } from 'react-router-dom';
 import io from 'socket.io-client';
 const socket = io('http://localhost:9999');
 import debounce from 'lodash.debounce'
-import { RiSendPlaneFill, RiEmojiStickerFill, RiAttachment2,RiVideoAddFill  } from 'react-icons/ri';
+import { RiSendPlaneFill, RiEmojiStickerFill, RiAttachment2, RiVideoAddFill } from 'react-icons/ri';
 import { FiPhoneCall } from "react-icons/fi";
 import { HiDotsVertical } from "react-icons/hi";
 import pro from '/images/profile.jpeg';
-import  EmojiPicker  from 'emoji-picker-react';
+import EmojiPicker from 'emoji-picker-react';
 
 function Home() {
 
@@ -27,7 +27,11 @@ function Home() {
   const token = localStorage.getItem('token');
   const [results, setResults] = useState([]);
   const [showPicker, setShowPicker] = useState(false);
+// firebase
+const [selectedFile, setSelectedFile] = useState('');
+// firebase
   const chatBoxRef = useRef(null);
+  const attFileRef = useRef(null);
 
 
 
@@ -106,14 +110,14 @@ function Home() {
 
 
   const formatTimestamp = (timestamp) => {
-    const date = new Date(timestamp); 
-       const options = {
+    const date = new Date(timestamp);
+    const options = {
       timeZone: 'Asia/Kolkata',
       hour: '2-digit',
       minute: '2-digit',
       hour12: true
     };
-     return date.toLocaleTimeString('en-US', options);
+    return date.toLocaleTimeString('en-US', options);
   };
 
 
@@ -122,7 +126,7 @@ function Home() {
   // ###############################  chat send ######################################
 
 
-const chatsend = (e) => {
+  const chatsend = (e) => {
     e.preventDefault();
 
     if (selectedUserId) {
@@ -131,9 +135,11 @@ const chatsend = (e) => {
           content: mssg,
           receiverId: selectedUserId,
           senderId: sessionUser.user_id,
+          fileUrl:selectedFile,
           timestamp: new Date(),
         };
 
+        console.log('newMessage: ', newMessage);
         socket.emit('sendMessage', newMessage);
 
 
@@ -214,21 +220,24 @@ const chatsend = (e) => {
 
 
   const onEmojiClick = (emojiObject) => {
-    console.log('emojiObject.emoji: ', emojiObject.emoji);
-    setMssg((prevMssg) => prevMssg + emojiObject.emoji); 
+    setMssg((prevMssg) => prevMssg + emojiObject.emoji);
     setShowPicker(false);
   };;
 
 
-// 
 
+  // firebase ###############################################
 
-
+  const uplaodfile = ()=>{
+    if (attFileRef.current && attFileRef.current.files.length > 0) {
+      setSelectedFile(attFileRef.current.files[0]);
+    }
+  }
 
 
   return (
     <>
-    
+
       <div className="flex py-4 border sticky top-0 z-10 bg-blue-50 shadow-md">
         <div className="w-1/4 text-center ">
 
@@ -274,9 +283,9 @@ const chatsend = (e) => {
           </div>
 
           <div className={`flex justify-end gap-7 text-3xl px-3 text-blue-500 ${selectedUserId ? '' : 'hidden'}`}>
-<FiPhoneCall/> 
-<RiVideoAddFill />
-<HiDotsVertical/>
+            <FiPhoneCall />
+            <RiVideoAddFill />
+            <HiDotsVertical />
           </div>
 
         </div>
@@ -284,7 +293,7 @@ const chatsend = (e) => {
 
 
 
-      <div style={{ display: 'flex' }}>
+      <div className='flex'>
         <div className='w-1/4 h-screen bg-blue-100 p-2 border-blue-300 border-r overflow-y-auto'>
           {loading ? (
             <div>Loading...</div>
@@ -296,18 +305,18 @@ const chatsend = (e) => {
                 className='py-5 ps-5 my-2 rounded-lg bg-blue-300 border-b border-blue-50 shadow-sm flex'
                 key={item.user_id}
                 id={item.user_id}
-                onClick={chatshow}  
+                onClick={chatshow}
               >
-                <img 
-                  src={item.Profile !== '' ? `http://localhost:9999/${item.Profile}` : pro} 
-                  alt="" 
+                <img
+                  src={item.Profile !== '' ? `http://localhost:9999/${item.Profile}` : pro}
+                  alt=""
                   className='w-10 h-10 rounded-full'
-                  onClick={(e) => e.stopPropagation()} 
+                  onClick={(e) => e.stopPropagation()}
                 />
-                <div 
+                <div
                   className='font-medium text-gray-800 ps-4 text-lg'
-                  onClick={(e) => e.stopPropagation()} 
-                > 
+                  onClick={(e) => e.stopPropagation()}
+                >
                   {item.username}
                 </div>
               </div>
@@ -317,43 +326,44 @@ const chatsend = (e) => {
 
         <div className="chatbody w-3/4 h-screen bg-blue-100 relative " >
 
-{/* 11 */}
+          {/* 11 */}
 
-<div className="chatbox overflow-auto" ref={chatBoxRef}>
-  {message.map((mg, i) => {
-    const isNewBlock = i === 0 || message[i - 1].senderId !== mg.senderId;
-    const formattedTime = formatTimestamp(mg.timestamp);
+          <div className="chatbox overflow-auto" ref={chatBoxRef}>
+            {message.map((mg, i) => {
+              const isNewBlock = i === 0 || message[i - 1].senderId !== mg.senderId;
+              const formattedTime = formatTimestamp(mg.timestamp);
 
-    return (
-      <div key={i} className={`flex ${mg.senderId === selectedUserId ? 'justify-start' : 'justify-end'} gap-2`}>
-        {isNewBlock && mg.senderId === selectedUserId ? (
-          <img
-            src={singleUser.Profile !== '' ? `http://localhost:9999/${singleUser.Profile}` : pro}
-            alt="User Profile"
-            className="w-10 h-10 rounded-full"
-          />
-        ) : (
-          <div className="w-10"></div>
-        )}
+              return (
+                <div key={i} className={`flex ${mg.senderId === selectedUserId ? 'justify-start' : 'justify-end'} gap-2`}>
+                  {isNewBlock && mg.senderId === selectedUserId ? (
+                    <img
+                      src={singleUser.Profile !== '' ? `http://localhost:9999/${singleUser.Profile}` : pro}
+                      alt="User Profile"
+                      className="w-10 h-10 rounded-full"
+                    />
+                  ) : (
+                    <div className="w-10"></div>
+                  )}
 
-        <div className="flex flex-col">
-          <div
-            className={`${mg.senderId === selectedUserId ? 'bg-slate-50 text-gray-700' : 'bg-blue-400 text-white me-2'} ms-1 mt-1 mb-2 p-3 rounded-lg shadow-sm relative pe-12`}
-          >
-            {mg.content} <span className='text-[9px] absolute right-2 bottom-[-1px]'>{formattedTime}</span>
+                  <div className="flex flex-col">
+                    <div
+                      className={`${mg.senderId === selectedUserId ? 'bg-slate-50 text-gray-700' : 'bg-blue-400 text-white me-2'} ms-1 mt-1 mb-2 p-3 rounded-lg shadow-sm relative pe-12`}
+                    >
+                      {mg.content} <span className='text-[9px] absolute right-2 bottom-[-1px]'>{formattedTime}</span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
-        </div>
-      </div>
-    );
-  })}
-</div>
 
 
-{/* 11 */}
+          {/* 11 */}
 
 
           <div className={`chatsend fixed flex justify-start gap-5  bottom-0 text-center p-5 bg-white w-3/4 ${selectedUserId ? 'block' : 'hidden'}`}>
-            <button><RiAttachment2 className='text-3xl mt-1 text-blue-500' /> </button>
+          <input type="file" name="attFile" id="" className='hidden' ref={attFileRef} onChange={uplaodfile}/>
+            <button><RiAttachment2 className='text-3xl mt-1 text-blue-500'  onClick={()=>attFileRef.current.click()}/> </button>
             <input
               type="text"
               name="mssg"
@@ -364,7 +374,7 @@ const chatsend = (e) => {
               onChange={(e) => setMssg(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
-                  chatsend(e); 
+                  chatsend(e);
                 }
               }}
             />
@@ -379,10 +389,10 @@ const chatsend = (e) => {
 
           </div>
           {showPicker && (
-  <div className="emoji-picker-container">
-    <EmojiPicker onEmojiClick={onEmojiClick} />
-  </div>
-)}
+            <div className="emoji-picker-container">
+              <EmojiPicker onEmojiClick={onEmojiClick} />
+            </div>
+          )}
         </div>
       </div>
     </>

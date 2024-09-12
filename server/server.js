@@ -31,6 +31,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on('sendMessage', async (message) => {
+    console.log('messagefwafwafwa: ', message);
     try {
     
       let chat = await Chat.findOne({
