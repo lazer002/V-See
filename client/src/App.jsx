@@ -7,6 +7,8 @@ import Profile from './pages/Profile';
 import Signin from './pages/Signin';
 import Signup from './pages/Signup';
 import Forgot from './pages/Forgot'; 
+import Sidebar from './components/Sidebar'; 
+
 import { AuthContext } from './AuthContext';
 
 
@@ -22,6 +24,7 @@ function App() {
       <Route path="/dashboard" element={isLoggedIn ? <Dashboard /> : <Navigate to="/signin" />} />
 
       <Route path="/forgotpassword" element={<Forgot />} /> 
+      <Route path="/Sidebar" element={<Sidebar />} /> 
     </Routes>
   );
 }

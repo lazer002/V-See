@@ -27,7 +27,7 @@ router.get('/getuser', authMiddleware, async (req, res) => {
 
 
     const user = { email: req.email, user_id: req.user_id };
-    const data = await newuser.find({ user_id: { $ne: req.user_id } });
+    const data = await newuser.find({ user_id: { $ne: req.user_id },'friend_requests.status': 'accepted' });
     return res.status(200).json({ data, user });
 
   } catch (error) {

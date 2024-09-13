@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import io from 'socket.io-client';
 const socket = io('http://localhost:9999');
 import debounce from 'lodash.debounce'
-import { RiSendPlaneFill, RiEmojiStickerFill, RiAttachment2, RiVideoAddFill,RiMessage3Line, RiUserAddLine, RiGroupLine, RiPieChartLine } from 'react-icons/ri';
+import { RiSendPlaneFill, RiEmojiStickerFill, RiAttachment2, RiVideoAddFill } from 'react-icons/ri';
 import { FiPhoneCall } from "react-icons/fi";
 import { HiDotsVertical } from "react-icons/hi";
 import pro from '/images/profile.jpeg';
@@ -32,7 +32,7 @@ const [selectedFile, setSelectedFile] = useState('');
 // firebase
   const chatBoxRef = useRef(null);
   const attFileRef = useRef(null);
-  const [activeTab, setActiveTab] = useState(1); 
+
 
 
 
@@ -238,9 +238,11 @@ const [selectedFile, setSelectedFile] = useState('');
   return (
     <>
 
-<div className="flex py-4 border sticky top-0 z-10 bg-blue-50 shadow-md">
+      <div className="flex py-4 border sticky top-0 z-10 bg-blue-50 shadow-md">
         <div className="w-1/4 text-center ">
 
+
+          {/* search start */}
 
           <div className=' relative'>
             <input
@@ -257,11 +259,12 @@ const [selectedFile, setSelectedFile] = useState('');
           </div>
 
 
+          {/* search end */}
         </div>
 
 
         <div className=" w-3/4 flex justify-between">
-       
+          {/* chat profile */}
           <div className="chatuser px-5">
             {singleUser.username != undefined ? (
               <Link to={`/user/${singleUser.username}/${singleUser._id}`}>
@@ -286,166 +289,112 @@ const [selectedFile, setSelectedFile] = useState('');
           </div>
 
         </div>
-</div>
-
-<div className="flex">
-  {/* hhhhh */}
-      <div className="w-16 fixed h-full bg-gray-200 p-4 flex flex-col items-center border-r">
-        <div
-          className={`p-4 ${activeTab === 1 ? 'bg-blue-400 text-white' : 'text-gray-600'}`}
-          onClick={() => setActiveTab(1)}
-        >
-          <RiMessage3Line size={24} />
-        </div>
-        <div
-          className={`p-4 ${activeTab === 2 ? 'bg-blue-400 text-white' : 'text-gray-600'}`}
-          onClick={() => setActiveTab(2)}
-        >
-          <RiUserAddLine size={24} />
-        </div>
-        <div
-          className={`p-4 ${activeTab === 3 ? 'bg-blue-400 text-white' : 'text-gray-600'}`}
-          onClick={() => setActiveTab(3)}
-        >
-          <RiGroupLine size={24} />
-        </div>
-        <div
-          className={`p-4 ${activeTab === 4 ? 'bg-blue-400 text-white' : 'text-gray-600'}`}
-          onClick={() => setActiveTab(4)}
-        >
-          <RiPieChartLine size={24} />
-        </div>
       </div>
 
-      <div className="flex-1 ms-12">
-        {activeTab === 1 && (
-          <div className="">
-            {/* hhh */}
-            <div className='flex '>
-            <div className='w-1/4  bg-blue-100'>
-              <div className=' p-2 border-blue-300 border-r overflow-y-auto'>
-                {loading ? (
-                  <div>Loading...</div>
-                ) : error ? (
-                  <div>{error} </div>
-                ) : (
-                  user.map((item) => (
+
+
+      <div className='flex'>
+        <div className='w-1/4 h-screen bg-blue-100 p-2 border-blue-300 border-r overflow-y-auto'>
+          {loading ? (
+            <div>Loading...</div>
+          ) : error ? (
+            <div>{error} </div>
+          ) : (
+            user.map((item) => (
+              <div
+                className='py-5 ps-5 my-2 rounded-lg bg-blue-300 border-b border-blue-50 shadow-sm flex'
+                key={item.user_id}
+                id={item.user_id}
+                onClick={chatshow}
+              >
+                <img
+                  src={item.Profile !== '' ? `http://localhost:9999/${item.Profile}` : pro}
+                  alt=""
+                  className='w-10 h-10 rounded-full'
+                  onClick={(e) => e.stopPropagation()}
+                />
+                <div
+                  className='font-medium text-gray-800 ps-4 text-lg'
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {item.username}
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        <div className="chatbody w-3/4 h-screen bg-blue-100 relative " >
+
+          {/* 11 */}
+
+          <div className="chatbox overflow-auto" ref={chatBoxRef}>
+            {message.map((mg, i) => {
+              const isNewBlock = i === 0 || message[i - 1].senderId !== mg.senderId;
+              const formattedTime = formatTimestamp(mg.timestamp);
+
+              return (
+                <div key={i} className={`flex ${mg.senderId === selectedUserId ? 'justify-start' : 'justify-end'} gap-2`}>
+                  {isNewBlock && mg.senderId === selectedUserId ? (
+                    <img
+                      src={singleUser.Profile !== '' ? `http://localhost:9999/${singleUser.Profile}` : pro}
+                      alt="User Profile"
+                      className="w-10 h-10 rounded-full"
+                    />
+                  ) : (
+                    <div className="w-10"></div>
+                  )}
+
+                  <div className="flex flex-col">
                     <div
-                      className='py-5 ps-5 my-2 rounded-lg bg-blue-300 border-b border-blue-50 shadow-sm flex'
-                      key={item.user_id}
-                      id={item.user_id}
-                      onClick={chatshow}
+                      className={`${mg.senderId === selectedUserId ? 'bg-slate-50 text-gray-700' : 'bg-blue-400 text-white me-2'} ms-1 mt-1 mb-2 p-3 rounded-lg shadow-sm relative pe-12`}
                     >
-                      <img
-                        src={item.Profile !== '' ? `http://localhost:9999/${item.Profile}` : pro}
-                        alt=""
-                        className='w-10 h-10 rounded-full'
-                        onClick={(e) => e.stopPropagation()}
-                      />
-                      <div
-                        className='font-medium text-gray-800 ps-4 text-lg'
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        {item.username}
-                      </div>
+                      {mg.content} <span className='text-[9px] absolute right-2 bottom-[-1px]'>{formattedTime}</span>
                     </div>
-                  ))
-                )}
-              </div>
-              </div>
-{/* hhh */}
-              <div className="chatbody w-3/4  bg-blue-100 relative ">
-                <div className="chatbox overflow-auto" ref={chatBoxRef}>
-                  {message.map((mg, i) => {
-                    const isNewBlock = i === 0 || message[i - 1].senderId !== mg.senderId;
-                    const formattedTime = formatTimestamp(mg.timestamp);
-
-                    return (
-                      <div key={i} className={`flex ${mg.senderId === selectedUserId ? 'justify-start' : 'justify-end'} gap-2`}>
-                        {isNewBlock && mg.senderId === selectedUserId ? (
-                          <img
-                            src={singleUser.Profile !== '' ? `http://localhost:9999/${singleUser.Profile}` : pro}
-                            alt="User Profile"
-                            className="w-10 h-10 rounded-full"
-                          />
-                        ) : (
-                          <div className="w-10"></div>
-                        )}
-
-                        <div className="flex flex-col">
-                          <div
-                            className={`${mg.senderId === selectedUserId ? 'bg-slate-50 text-gray-700' : 'bg-blue-400 text-white me-2'} ms-1 mt-1 mb-2 p-3 rounded-lg shadow-sm relative pe-12`}
-                          >
-                            {mg.content} <span className='text-[9px] absolute right-2 bottom-[-1px]'>{formattedTime}</span>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                <div className={`chatsend fixed flex justify-start gap-5 bottom-0 text-center p-5 bg-white w-3/4 ${selectedUserId ? 'block' : 'hidden'}`}>
-                  <input type="file" name="attFile" id="" className='hidden' ref={attFileRef} onChange={uplaodfile} />
-                  <button>
-                    <RiAttachment2 className='text-3xl mt-1 text-blue-500' onClick={() => attFileRef.current.click()} />
-                  </button>
-                  <input
-                    type="text"
-                    name="mssg"
-                    value={mssg}
-                    id="mssg"
-                    className='w-11/12 p-3 rounded-lg'
-                    placeholder='Type your message and press enter'
-                    onChange={(e) => setMssg(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        chatsend(e);
-                      }
-                    }}
-                  />
-                  <div className='flex px-2 pt-1 justify-evenly'>
-                    <button>
-                      <RiSendPlaneFill className='text-4xl mx-2 text-blue-500' onClick={chatsend} />
-                    </button>
-                    <button>
-                      <RiEmojiStickerFill className='text-4xl mx-2 text-blue-500' onClick={() => setShowPicker((val) => !val)} />
-                    </button>
                   </div>
                 </div>
+              );
+            })}
+          </div>
 
-                {showPicker && (
-                  <div className="emoji-picker-container">
-                    <EmojiPicker onEmojiClick={onEmojiClick} />
-                  </div>
-                )}
-              </div>
+
+          {/* 11 */}
+
+
+          <div className={`chatsend fixed flex justify-start gap-5  bottom-0 text-center p-5 bg-white w-3/4 ${selectedUserId ? 'block' : 'hidden'}`}>
+          <input type="file" name="attFile" id="" className='hidden' ref={attFileRef} onChange={uplaodfile}/>
+            <button><RiAttachment2 className='text-3xl mt-1 text-blue-500'  onClick={()=>attFileRef.current.click()}/> </button>
+            <input
+              type="text"
+              name="mssg"
+              value={mssg}
+              id="mssg"
+              className='w-11/12 p-3 rounded-lg '
+              placeholder='Type your message and press enter'
+              onChange={(e) => setMssg(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  chatsend(e);
+                }
+              }}
+            />
+
+
+            <div className='flex px-2 pt-1 justify-evenly'>
+              <button><RiSendPlaneFill className='text-4xl mx-2 text-blue-500' onClick={chatsend} /></button>
+
+              <button>  <RiEmojiStickerFill className='text-4xl mx-2  text-blue-500' onClick={() => setShowPicker((val) => !val)} /></button>
             </div>
-          </div>
-        )}
 
-        {activeTab === 2 && (
-          <div className="p-4">
-            {/* Add Friend or Request Tab content here */}
-            <h1>Add Friend or Request</h1>
-          </div>
-        )}
 
-        {activeTab === 3 && (
-          <div className="p-4">
-            {/* Group Tab content here */}
-            <h1>Group Chat</h1>
           </div>
-        )}
-
-        {activeTab === 4 && (
-          <div className="p-4">
-            {/* Status Tab content here */}
-            <h1>Status</h1>
-          </div>
-        )}
+          {showPicker && (
+            <div className="emoji-picker-container">
+              <EmojiPicker onEmojiClick={onEmojiClick} />
+            </div>
+          )}
+        </div>
       </div>
-</div>
-
     </>
   );
 }
