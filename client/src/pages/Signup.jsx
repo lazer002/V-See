@@ -1,47 +1,4 @@
-// import React, { useState } from 'react';
-// import axios from 'axios';
-// import { useNavigate, Link } from 'react-router-dom';
 
-// function Signup() {
-//   const navigate = useNavigate();
-//   const [user, setUser] = useState({
-//     email: '', password: '', username: ''
-//   });
-
-//   const handleInp = (e) => {
-//     const { name, value } = e.target;
-//     setUser({ ...user, [name]: value });
-//   };
-
-//   const subData = async (e) => {
-//     e.preventDefault();
-//     try {
-//       const data = await axios.post('http://localhost:9999/signup', user);
-//       localStorage.setItem('token', data.data.token);
-//       navigate('/signin');
-//     } catch (error) {
-//       console.error("Error during sign up:", error);
-//     }
-//   };
-
-//   const googleAuth = () => {
-//     window.location.href = 'http://localhost:9999/auth/google/';
-//   };
-
-//   return (
-//     <>
-//       <h4>User SignUp</h4>
-//       <input type='email' name="email" id="email" value={user.email} onChange={handleInp} />
-//       <input type="password" name="password" id="password" value={user.password} onChange={handleInp} />
-//       <input type="text" name="username" min={6} max={12} id="username" value={user.username} onChange={handleInp} />
-//       <button type="submit" onClick={subData}>Submit</button>
-//       {/* <p onClick={googleAuth} style={{ cursor: 'pointer',border:'1px solid black',width:'fit-content',padding:'4px' }}>Sign Up with Google</p> */}
-//       <p>I already have an account <Link to="/signin">Sign In</Link></p>
-//     </>
-//   );
-// }
-
-// export default Signup;
 
 
 
@@ -49,6 +6,8 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 import { RiGoogleFill } from 'react-icons/ri';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function Signup() {
   const navigate = useNavigate();
@@ -61,16 +20,18 @@ function Signup() {
     setUser({ ...user, [name]: value });
   };
 
+
   const subData = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:9999/signup', user);
-      localStorage.setItem('token', response.data.token);
-      navigate('/signin');
+        const response = await axios.post('http://localhost:9999/signup', user);
+        localStorage.setItem('token', response.data.token);
+        toast.success("Signup successful!");
+        navigate('/signin');
     } catch (error) {
-      console.error("Error during sign up:", error);
+        toast.error(error.response?.data?.msg || "Error during sign up");
     }
-  };
+}
 
   const googleAuth = () => {
     window.location.href = 'http://localhost:9999/auth/google/';
@@ -116,7 +77,7 @@ function Signup() {
               value={user.username}
               onChange={handleInp}
               placeholder="Choose a username"
-              minLength={6}
+              minLength={4}
               maxLength={12}
               className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-transform hover:bg-gray-50"
               required
@@ -142,6 +103,7 @@ function Signup() {
           </button>
         </div>
       </div>
+      <ToastContainer/>
     </div>
   );
 }

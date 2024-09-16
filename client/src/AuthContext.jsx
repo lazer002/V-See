@@ -15,6 +15,8 @@ export function AuthProvider({ children }) {
     setIsLoggedIn(false);
   };
 
+  
+
   return (
     <AuthContext.Provider value={{ isLoggedIn, login, logout }}>
       {children}

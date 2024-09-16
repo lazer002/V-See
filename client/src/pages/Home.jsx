@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import io from 'socket.io-client';
 const socket = io('http://localhost:9999');
 import debounce from 'lodash.debounce'
-import { RiSendPlaneFill, RiEmojiStickerFill, RiAttachment2, RiVideoAddFill,RiMessage3Line, RiUserAddLine, RiGroupLine, RiPieChartLine } from 'react-icons/ri';
+import { RiSendPlaneFill, RiEmojiStickerFill, RiAttachment2, RiVideoAddFill,RiMessage3Line, RiUserAddLine, RiGroupLine, RiPieChartLine,RiCheckFill, RiCloseFill } from 'react-icons/ri';
 import { FiPhoneCall } from "react-icons/fi";
 import { HiDotsVertical } from "react-icons/hi";
 import pro from '/images/profile.jpeg';
@@ -63,7 +63,7 @@ const [selectedFile, setSelectedFile] = useState('');
     userdata();
   }, []);
 
-
+console.log(sessionUser.email,'sessionUsersessionUsersessionUser');
 
   // ###############################  chat  show ######################################
 
@@ -239,57 +239,98 @@ const [selectedFile, setSelectedFile] = useState('');
     <>
 
 <div className="flex py-4 border sticky top-0 z-10 bg-blue-50 shadow-md">
-        <div className="w-1/4 text-center ">
+<div className="w-1/4 text-center ">
+ <div className=' relative'>
+    <input
+      type="text"
+      onChange={addSearch}
+      placeholder="Search for friends"
+      className='p-2 w-10/12 rounded-lg shadow-sm'
+    />
+    {/* <div className=' absolute z-10'>
+      {results.map((user) => (
+        <div key={user.user_id} className=' bg-blue-100 border-b border-blue-50 py-4 px-2' >{user.username} <button type="submit" onClick={addfriend} id={user.user_id}>Add</button></div>
+      ))}
+    </div> */}
 
 
-          <div className=' relative'>
-            <input
-              type="text"
-              onChange={addSearch}
-              placeholder="Search for friends"
-              className='p-2 w-10/12 rounded-lg shadow-sm'
-            />
-            <div className=' absolute z-10'>
-              {results.map((user) => (
-                <div key={user.user_id} className=' bg-blue-100 border-b border-blue-50 py-4 px-2' >{user.username} <button type="submit" onClick={addfriend} id={user.user_id}>Add</button></div>
-              ))}
-            </div>
+
+<div className='absolute z-10 w-full max-w-md bg-white shadow-lg rounded-lg'>
+  {results.map((user) => (
+    <div
+      key={user.user_id}
+      className='flex items-center justify-between bg-blue-50 hover:bg-blue-100 border-b border-blue-200 py-3 px-4 rounded-lg mb-2 transition duration-200 ease-in-out'
+    >
+      <div className='text-gray-800 font-medium'>{user.username}</div>
+
+      <div className='flex space-x-3'>
+        <button
+          className='bg-green-500 hover:bg-green-600 text-white p-2 rounded-full shadow-md transition duration-200 ease-in-out'
+          onClick={addfriend}
+          id={user.user_id}
+        >
+          <RiCheckFill className="h-5 w-5" />
+        </button>
+
+        <button
+          className='bg-red-500 hover:bg-red-600 text-white p-2 rounded-full shadow-md transition duration-200 ease-in-out'
+          // onClick={deletefriend} 
+          id={user.user_id}
+        >
+          <RiCloseFill className="h-5 w-5" />
+        </button>
+      </div>
+    </div>
+  ))}
+</div>
+
+
+
+
+
+
+  </div>
+</div>
+
+
+<div className=" w-3/4 flex justify-between">
+
+  <div className="chatuser px-5">
+    {singleUser.username != undefined ? (
+      <Link to={`/user/${singleUser.username}/${singleUser._id}`}>
+        <div className="flex">
+
+          <img src={singleUser.Profile != '' ? `http://localhost:9999/${singleUser.Profile}` : pro} alt="" className='w-10 h-10 rounded-full' />
+
+          <div className='px-3 text-2xl text-blue-500 font-medium'>
+            {singleUser.username}
           </div>
-
-
         </div>
+      </Link>
 
+    ) : ('')}
 
-        <div className=" w-3/4 flex justify-between">
-       
-          <div className="chatuser px-5">
-            {singleUser.username != undefined ? (
-              <Link to={`/user/${singleUser.username}/${singleUser._id}`}>
-                <div className="flex">
+  </div>
 
-                  <img src={singleUser.Profile != '' ? `http://localhost:9999/${singleUser.Profile}` : pro} alt="" className='w-10 h-10 rounded-full' />
+  <div className={`flex justify-end gap-7 text-3xl px-3 text-blue-500 ${selectedUserId ? '' : 'hidden'}`}>
+    <FiPhoneCall />
+    <RiVideoAddFill />
+    <HiDotsVertical />
+  </div>
 
-                  <div className='px-3 text-2xl text-blue-500 font-medium'>
-                    {singleUser.username}
-                  </div>
-                </div>
-              </Link>
-
-            ) : ('')}
-
-          </div>
-
-          <div className={`flex justify-end gap-7 text-3xl px-3 text-blue-500 ${selectedUserId ? '' : 'hidden'}`}>
-            <FiPhoneCall />
-            <RiVideoAddFill />
-            <HiDotsVertical />
-          </div>
-
-        </div>
+</div>
 </div>
 
 <div className="flex">
-  {/* hhhhh */}
+
+  {/* ##########################################   sidebar ################################# */}
+{/* ##########################################   sidebar ################################# */}
+{/* ##########################################   sidebar ################################# */}
+{/* ##########################################   sidebar ################################# */}
+{/* ##########################################   sidebar ################################# */}
+{/* ##########################################   sidebar ################################# */}
+{/* ##########################################   sidebar ################################# */}
+
       <div className="w-16 fixed h-full bg-gray-200 p-4 flex flex-col items-center border-r">
         <div
           className={`p-4 ${activeTab === 1 ? 'bg-blue-400 text-white' : 'text-gray-600'}`}
@@ -315,13 +356,27 @@ const [selectedFile, setSelectedFile] = useState('');
         >
           <RiPieChartLine size={24} />
         </div>
+        <Link to={`/user/${sessionUser.email}/${sessionUser._id}`}>
+        <img src={pro}   className='h-9 w-9 rounded-full border border-gray-500 fixed bottom-5 left-4'/>
+        </Link>
       </div>
+
+
 
       <div className="flex-1 ms-12">
         {activeTab === 1 && (
           <div className="">
-            {/* hhh */}
+
             <div className='flex '>
+{/* ##########################################   left side ################################# */}
+{/* ##########################################   left side ################################# */}
+{/* ##########################################   left side ################################# */}
+{/* ##########################################   left side ################################# */}
+{/* ##########################################   left side ################################# */}
+{/* ##########################################   left side ################################# */}
+{/* ##########################################   left side ################################# */}
+
+
             <div className='w-1/4  bg-blue-100'>
               <div className=' p-2 border-blue-300 border-r overflow-y-auto'>
                 {loading ? (
@@ -353,7 +408,16 @@ const [selectedFile, setSelectedFile] = useState('');
                 )}
               </div>
               </div>
-{/* hhh */}
+
+{/* ##########################################   right side ################################# */}
+{/* ##########################################   right side ################################# */}
+{/* ##########################################   right side ################################# */}
+{/* ##########################################   right side ################################# */}
+{/* ##########################################   right side ################################# */}
+{/* ##########################################   right side ################################# */}
+{/* ##########################################   right side ################################# */}
+
+
               <div className="chatbody w-3/4  bg-blue-100 relative ">
                 <div className="chatbox overflow-auto" ref={chatBoxRef}>
                   {message.map((mg, i) => {
@@ -423,10 +487,56 @@ const [selectedFile, setSelectedFile] = useState('');
           </div>
         )}
 
+
+
+{/* #################################################   2nd ################################# */}
+{/* #################################################   2nd ################################# */}
+{/* #################################################   2nd ################################# */}
+{/* #################################################   2nd ################################# */}
+{/* #################################################   2nd ################################# */}
+{/* #################################################   2nd ################################# */}
+{/* #################################################   2nd ################################# */}
+{/* #################################################   2nd ################################# */}
+{/* #################################################   2nd ################################# */}
+{/* #################################################   2nd ################################# */}
+{/* #################################################   2nd ################################# */}
+
+
+
+
+
+
+
         {activeTab === 2 && (
           <div className="p-4">
-            {/* Add Friend or Request Tab content here */}
-            <h1>Add Friend or Request</h1>
+        <div className="w-100">
+        {results.map((user) => (
+    <div
+      key={user.user_id}
+      className='flex items-center justify-between bg-blue-50 hover:bg-blue-100 border-b border-blue-200 py-3 px-4 rounded-lg mb-2 transition duration-200 ease-in-out'
+    >
+      <div className='text-gray-800 font-medium'>{user.username}</div>
+
+      <div className='flex space-x-3'>
+        <button
+          className='bg-green-500 hover:bg-green-600 text-white p-2 rounded-full shadow-md transition duration-200 ease-in-out'
+          onClick={addfriend}
+          id={user.user_id}
+        >
+          <RiCheckFill className="h-5 w-5" />
+        </button>
+
+        <button
+          className='bg-red-500 hover:bg-red-600 text-white p-2 rounded-full shadow-md transition duration-200 ease-in-out'
+          // onClick={deletefriend} 
+          id={user.user_id}
+        >
+          <RiCloseFill className="h-5 w-5" />
+        </button>
+      </div>
+    </div>
+  ))}
+        </div>
           </div>
         )}
 
@@ -444,6 +554,10 @@ const [selectedFile, setSelectedFile] = useState('');
           </div>
         )}
       </div>
+
+
+
+      
 </div>
 
     </>
